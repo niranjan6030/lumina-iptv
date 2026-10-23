@@ -1,4 +1,4 @@
-# Lumina — IPTV player for iPhone and CarPlay
+# Lumina — IPTV player for iPhone + CarPlay and Android + Android Auto
 
 Native Swift / SwiftUI. Liquid Glass on iOS 26, graceful material fallback on iOS 17–25.
 Lumina ships **no channels**; you add your own M3U / Xtream provider.
@@ -55,13 +55,36 @@ Beyond the usual: **automatic failover to backup streams**, **duplicate-channel 
 become one channel with fallbacks), **dead-channel scan**, parental PIN with per-group locks (also enforced in CarPlay),
 adult-group hiding, backup/restore, friendly error messages.
 
+
+## Android + Android Auto (`android/`)
+
+Kotlin, Jetpack Compose, Media3/ExoPlayer. Same features and design as the iPhone app. ExoPlayer also plays raw MPEG-TS,
+so providers that only offer `.ts` work here.
+
+| Part | Verified how |
+|---|---|
+| `android/core` (parsers, guide, Xtream, search, merge, catch-up, user data) | 26 JUnit tests incl. mock Xtream panel and end-to-end HTTP + gzip guide (`./gradlew :core:test`) |
+| App UI + player | Built and run on an Android 16 emulator: Live (now/next), player with controls and live HLS video, Library, Search, Settings (screenshots below in CI notes) |
+| Android Auto media service | Instrumented test connects as a real `MediaBrowser` (what a car does): browse tree Favorites/Recent/Groups, search, id-only play starts, browsed list becomes the zapping queue |
+| Automatic failover | Instrumented test: dead FHD stream + good backup from a second provider merge into one channel, playback recovers by itself |
+| Not yet verified | A real car or the Desktop Head Unit, real providers, Picture-in-Picture UX, reminders |
+
+Build & run:
+```bash
+cd android
+./gradlew :core:test :app:assembleDebug            # APK: app/build/outputs/apk/debug/app-debug.apk
+./gradlew :app:connectedDebugAndroidTest           # needs a running emulator/device
+```
+Android Studio isn't required (JDK 21 + Android SDK is enough). Sideload the APK, then for Android Auto: Android Auto settings →
+tap *Version* 10 times → Developer settings → enable **Unknown sources**; Lumina then shows up in the car's media apps.
+Android Auto only allows audio from third-party media apps, so the car plays the channel audio (video stays on the phone).
+
 ## Known limits (honest list)
 * AVPlayer cannot play raw MPEG-TS over HTTP. Xtream-style `.ts` links are tried as `.m3u8` first. Providers that only
   offer raw TS will fail until an FFmpeg/VLC engine is added behind `PlayerController` (planned seam).
 * No full multi-channel timeline grid yet (per-channel schedule only).
 * No iCloud sync (needs a capability); use Backup/Restore.
 * Xtream passwords are stored in the app's sandbox, not the Keychain (yet).
-* Android app: not started.
 
 ## Layout
 ```
