@@ -1,0 +1,48 @@
+name: iOS IPA (free sideload)
+
+# Builds an UNSIGNED Lumina.ipa. No Apple Developer account needed: a sideloading tool
+# (Sideloadly / AltStore) signs it with your free Apple ID when you install it. See docs/SIDELOAD.md.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Archive (Release, unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Lumina.xcodeproj -scheme Lumina -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Lumina.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            | tee build.log
+
+      - name: Package Lumina.ipa
+        run: |
+          mkdir -p dist/Payload
+          cp -R build/Lumina.xcarchive/Products/Applications/Lumina.app dist/Payload/
+          (cd dist && zip -qry Lumina.ipa Payload && rm -rf Payload)
+          ls -lh dist/Lumina.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Lumina-ipa
+          path: dist/Lumina.ipa
+          retention-days: 30
