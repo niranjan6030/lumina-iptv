@@ -7,12 +7,11 @@ Lumina ships **no channels**; you add your own M3U / Xtream provider.
 
 | Part | Verified how |
 |---|---|
-| `Packages/LuminaCore` (playlist + guide parsing, Xtream, search, failover helpers, user data) | 29 automated tests pass (`scripts/test-core.sh`), incl. a 60k-channel parse in 0.7 s and an end-to-end HTTP + gzip guide test |
-| App model, player, all SwiftUI screens | Type-checked against the macOS 26 SDK (`scripts/typecheck-app-macos.sh`). **Not compiled for iOS, never run.** |
-| UIKit bits (PiP layer, AirPlay button, share sheet, image loader), `@main`, notifications | Syntax-checked only |
-| CarPlay scene (`App/CarPlay`) | Syntax-checked only. Needs Xcode + simulator/car |
-
-Expect a handful of compile errors on the first Xcode build. They'll be small; paste them back and they get fixed.
+| `Packages/LuminaCore` (parsing, guide, Xtream, search, failover helpers, user data) | 29 automated tests, run locally and in CI (`scripts/test-core.sh`) |
+| Whole iOS app incl. CarPlay scene | **Compiles with Xcode 26.6** on GitHub Actions (`.github/workflows/ios-build.yml`), no errors |
+| Phone UI + player | Launched in the iOS Simulator in CI with the demo source: Live list with now/next, player with live video and controls, Library, Search, Settings. Screenshots are attached to each CI run (artifact `screenshots`) |
+| CarPlay scene | Compiles. **Not yet run**: needs the Simulator's CarPlay window (Xcode) or a car |
+| Real providers (Xtream/M3U), PiP, AirPlay, reminders | Not tested yet (no provider available in CI) |
 
 ## Setup (once)
 
