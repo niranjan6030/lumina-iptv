@@ -57,7 +57,7 @@ jobs:
           shot() { sleep "$2"; xcrun simctl io "$UDID" screenshot "shots/$1.png"; }
           xcrun simctl launch "$UDID" $BID --demo; shot 1-live-demo 20
           xcrun simctl terminate "$UDID" $BID
-          xcrun simctl launch "$UDID" $BID --demo --play-first; shot 2a-player-controls 5; shot 2-player 20
+          xcrun simctl launch "$UDID" $BID --demo --play-first; shot 2a-player-controls 2; shot 2-player 20
           xcrun simctl terminate "$UDID" $BID
           xcrun simctl launch "$UDID" $BID --tab=settings; shot 3-settings 8
           xcrun simctl terminate "$UDID" $BID
