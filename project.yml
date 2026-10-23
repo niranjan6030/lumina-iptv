@@ -43,6 +43,7 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: Lumina
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIBackgroundModes:
           - audio

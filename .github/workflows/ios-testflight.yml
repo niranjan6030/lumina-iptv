@@ -1,0 +1,128 @@
+name: iOS TestFlight
+
+# Manual: Actions tab -> "iOS TestFlight" -> Run workflow.
+# Without Apple credentials it still does an unsigned Release build (so you know the app compiles).
+# With the secrets/variables from docs/TESTFLIGHT.md it signs in the cloud and uploads to TestFlight.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  testflight:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_BASE64: ${{ secrets.ASC_KEY_BASE64 }}
+      TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      BUNDLE_ID: ${{ vars.BUNDLE_ID }}
+      CARPLAY: ${{ vars.CARPLAY_ENTITLEMENT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Check credentials
+        id: creds
+        run: |
+          missing=""
+          [ -z "$ASC_KEY_ID" ] && missing="$missing ASC_KEY_ID(secret)"
+          [ -z "$ASC_ISSUER_ID" ] && missing="$missing ASC_ISSUER_ID(secret)"
+          [ -z "$ASC_KEY_BASE64" ] && missing="$missing ASC_KEY_BASE64(secret)"
+          [ -z "$TEAM_ID" ] && missing="$missing APPLE_TEAM_ID(variable)"
+          [ -z "$BUNDLE_ID" ] && missing="$missing BUNDLE_ID(variable)"
+          if [ -n "$missing" ]; then
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=TestFlight upload skipped::Missing:$missing. Doing an unsigned Release build only. See docs/TESTFLIGHT.md."
+          else
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      # ---------- no credentials: prove the Release build compiles ----------
+      - name: Release archive (unsigned)
+        if: steps.creds.outputs.signed != 'true'
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Lumina.xcodeproj -scheme Lumina -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Lumina.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            | tee build.log
+          ls build/Lumina.xcarchive/Products/Applications
+
+      # ---------- credentials present: signed archive + upload ----------
+      - name: Write App Store Connect key
+        if: steps.creds.outputs.signed == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/keys"
+          echo "$ASC_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8"
+          echo "KEY_PATH=$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
+
+      - name: Archive (cloud-managed signing)
+        if: steps.creds.outputs.signed == 'true'
+        run: |
+          set -o pipefail
+          ENT=""
+          [ "$CARPLAY" = "true" ] && ENT="LUMINA_DEVICE_ENTITLEMENTS=App/Lumina.entitlements"
+          xcodebuild archive \
+            -project Lumina.xcodeproj -scheme Lumina -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Lumina.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" LUMINA_BUNDLE_ID="$BUNDLE_ID" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} $ENT \
+            | tee build.log
+
+      - name: Export and upload to TestFlight
+        if: steps.creds.outputs.signed == 'true'
+        run: |
+          set -o pipefail
+          cat > ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath build/Lumina.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/export \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            | tee export.log
+
+      - name: Remove key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/keys"
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testflight-logs
+          path: |
+            build.log
+            export.log
+          if-no-files-found: ignore
