@@ -47,7 +47,12 @@ struct LuminaApp: App {
                 .environment(model)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
-                .task { await model.bootstrap() }
+                .task {
+                    await model.bootstrap()
+                    #if DEBUG
+                    await DebugLaunch.run(model)
+                    #endif
+                }
         }
     }
 }
@@ -67,11 +72,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     // Tapping a reminder jumps straight to the channel.
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         guard let id = response.notification.request.content.userInfo["channelID"] as? String else { return }
+        await AppModel.shared.bootstrap()
         await MainActor.run {
-            Task {
-                await AppModel.shared.bootstrap()
-                if let ch = AppModel.shared.channel(id: id) { UIState.shared.play(ch) }
-            }
+            if let ch = AppModel.shared.channel(id: id) { UIState.shared.play(ch) }
         }
     }
 }
@@ -97,3 +100,24 @@ enum ReminderCenter {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [r.id])
     }
 }
+
+#if DEBUG
+/// Debug-only launch switches used by CI to screenshot the app: --demo, --tab=<library|search|settings>, --play-first
+enum DebugLaunch {
+    @MainActor static func run(_ model: AppModel) async {
+        let args = CommandLine.arguments
+        if args.contains("--demo") { await model.addDemo() }
+        if let t = args.first(where: { $0.hasPrefix("--tab=") })?.dropFirst(6) {
+            switch t {
+            case "library": UIState.shared.tab = .library
+            case "search": UIState.shared.tab = .search
+            case "settings": UIState.shared.tab = .settings
+            default: break
+            }
+        }
+        if args.contains("--play-first"), let ch = model.visibleChannels.first {
+            UIState.shared.play(ch, in: model.visibleChannels)
+        }
+    }
+}
+#endif

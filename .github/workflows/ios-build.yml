@@ -33,8 +33,44 @@ jobs:
           xcodebuild build \
             -project Lumina.xcodeproj -scheme Lumina \
             -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/DD \
             CODE_SIGNING_ALLOWED=NO \
             | tee build.log
+
+      - name: Run in simulator and take screenshots
+        id: smoke
+        continue-on-error: true
+        run: |
+          mkdir -p shots
+          APP=build/DD/Build/Products/Debug-iphonesimulator/Lumina.app
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)['devices']
+          c=[x for r,v in d.items() if 'iOS' in r for x in v if 'iPhone' in x['name'] and x['isAvailable']]
+          print(sorted(c,key=lambda x:('Pro' not in x['name'],x['name']))[0]['udid'])")
+          echo "Simulator: $UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl ui "$UDID" appearance dark || true
+          xcrun simctl install "$UDID" "$APP"
+          BID=com.niranjan.lumina
+          shot() { sleep "$2"; xcrun simctl io "$UDID" screenshot "shots/$1.png"; }
+          xcrun simctl launch "$UDID" $BID --demo; shot 1-live-demo 20
+          xcrun simctl terminate "$UDID" $BID
+          xcrun simctl launch "$UDID" $BID --demo --play-first; shot 2-player 25
+          xcrun simctl terminate "$UDID" $BID
+          xcrun simctl launch "$UDID" $BID --tab=settings; shot 3-settings 8
+          xcrun simctl terminate "$UDID" $BID
+          xcrun simctl launch "$UDID" $BID --tab=search; shot 4-search 6
+          xcrun simctl spawn "$UDID" log show --last 3m --predicate 'process == "Lumina"' --style compact > shots/app.log 2>&1 || true
+          ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i lumina > shots/crashes.txt || true
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots
 
       - name: Core tests (parsers, guide, Xtream, search)
         run: swift test
