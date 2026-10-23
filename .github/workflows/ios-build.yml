@@ -24,10 +24,6 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Core tests (parsers, guide, Xtream, search)
-        run: swift test
-        working-directory: Packages/LuminaCore
-
       - name: Generate Xcode project
         run: xcodegen generate
 
@@ -39,6 +35,10 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             | tee build.log
+
+      - name: Core tests (parsers, guide, Xtream, search)
+        run: swift test
+        working-directory: Packages/LuminaCore
 
       - name: Upload build log
         if: always()

@@ -354,7 +354,8 @@ private let sid = UUID(uuidString: "11111111-2222-3333-4444-555555555555")!
         #expect(u.hasPIN)
         #expect(u.verifyPIN("1234"))
         #expect(!u.verifyPIN("0000"))
-        #expect(u.pinHash?.contains("1234") == false)
+        #expect(u.pinHash != "1234")
+        #expect(u.pinHash?.count == 64) // salted SHA-256 hex, never the PIN itself
         // An old file missing most keys must still load with defaults.
         let old = try JSONDecoder().decode(UserData.self, from: Data(#"{"favorites":["a"]}"#.utf8))
         #expect(old.favorites == ["a"])
