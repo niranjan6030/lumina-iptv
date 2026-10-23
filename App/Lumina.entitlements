@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Granted by Apple after you request the CarPlay entitlement. -->
+	<key>com.apple.developer.carplay-audio</key>
+	<true/>
+	<!-- When Apple also approves the CarPlay *video* entitlement, add the key shown on your
+	     developer.apple.com > Identifiers page for this App ID right here. -->
+</dict>
+</plist>

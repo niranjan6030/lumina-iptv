@@ -1,0 +1,13 @@
+// Per-developer settings. Edit this file, not the Xcode project.
+
+// Your Apple Developer Team ID (Xcode > Settings > Accounts, or developer.apple.com > Membership).
+DEVELOPMENT_TEAM =
+
+// Must be unique to you.
+LUMINA_BUNDLE_ID = com.niranjan.lumina
+
+// CarPlay on a REAL iPhone/car needs an entitlement Apple grants you (see README).
+// Until Apple approves it, leave this empty so the app builds and installs normally.
+// After approval, change it to:  LUMINA_DEVICE_ENTITLEMENTS = App/Lumina.entitlements
+// (The iOS Simulator always uses the CarPlay entitlements, so you can test CarPlay there today.)
+LUMINA_DEVICE_ENTITLEMENTS =

@@ -1,0 +1,7 @@
+.build/
+*.xcodeproj/xcuserdata/
+*.xcuserstate
+.DS_Store
+xcuserdata/
+DerivedData/
+Lumina.xcodeproj/
