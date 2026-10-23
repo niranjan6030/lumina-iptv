@@ -57,11 +57,13 @@ jobs:
           shot() { sleep "$2"; xcrun simctl io "$UDID" screenshot "shots/$1.png"; }
           xcrun simctl launch "$UDID" $BID --demo; shot 1-live-demo 20
           xcrun simctl terminate "$UDID" $BID
-          xcrun simctl launch "$UDID" $BID --demo --play-first; shot 2-player 25
+          xcrun simctl launch "$UDID" $BID --demo --play-first; shot 2a-player-controls 5; shot 2-player 20
           xcrun simctl terminate "$UDID" $BID
           xcrun simctl launch "$UDID" $BID --tab=settings; shot 3-settings 8
           xcrun simctl terminate "$UDID" $BID
           xcrun simctl launch "$UDID" $BID --tab=search; shot 4-search 6
+          xcrun simctl terminate "$UDID" $BID
+          xcrun simctl launch "$UDID" $BID --demo --tab=library; shot 5-library 8
           xcrun simctl spawn "$UDID" log show --last 3m --predicate 'process == "Lumina"' --style compact > shots/app.log 2>&1 || true
           ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i lumina > shots/crashes.txt || true
 

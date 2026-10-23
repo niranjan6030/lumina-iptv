@@ -229,6 +229,7 @@ struct PlayerScreen: View {
     // MARK: Live
 
     private var liveInfo: some View {
+        _ = model.guideVersion
         let nn = player.channel.map { model.nowNext($0) }
         return VStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 8) {

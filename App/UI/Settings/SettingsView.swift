@@ -25,6 +25,7 @@ struct SettingsView: View {
                 aboutSection
             }
             .scrollContentBackground(.hidden)
+            .background(AppBackground())
             .navigationTitle("Settings")
             .sheet(item: $addMode) { AddSourceView(mode: $0) }
             .sheet(isPresented: $showPINSetup) { PINSetupView() }

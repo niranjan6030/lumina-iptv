@@ -46,6 +46,7 @@ struct LibraryView: View {
                 }
                 .padding(.bottom, 24)
             }
+            .background(AppBackground())
             .navigationTitle("Library")
             .searchable(text: $query, prompt: "Search \(kind.rawValue.lowercased())")
             .task(id: "\(kind.rawValue)|\(category ?? "")|\(query)|\(model.libraryVersion)") { await refilter() }
@@ -373,6 +374,7 @@ struct SearchView: View {
             }
             .scrollContentBackground(.hidden)
             .listStyle(.insetGrouped)
+            .background(AppBackground())
             .navigationTitle("Search")
             .searchable(text: $query, prompt: "Channels, shows, movies")
             .task(id: query) {

@@ -47,6 +47,7 @@ struct LiveView: View {
                     }
                 }
             }
+            .background(AppBackground())
             .overlay { if list.isEmpty { emptyState } }
             .navigationTitle(title)
             .toolbar {
@@ -151,6 +152,7 @@ struct ChannelRow: View {
     @Binding var scheduleFor: Channel?
 
     var body: some View {
+        let _ = model.guideVersion // re-render when guide data arrives
         let nn = model.nowNext(channel, at: now)
         let locked = model.isLocked(group: channel.group)
         Button { UIState.shared.play(channel, in: list) } label: {
@@ -213,6 +215,7 @@ struct ChannelGrid<Header: View>: View {
                 header
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                     ForEach(channels) { ch in
+                        let _ = model.guideVersion
                         let nn = model.nowNext(ch, at: now)
                         Button { UIState.shared.play(ch, in: channels) } label: {
                             VStack(alignment: .leading, spacing: 8) {

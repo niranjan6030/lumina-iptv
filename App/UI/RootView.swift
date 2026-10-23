@@ -83,6 +83,7 @@ struct MiniPlayerBar: View {
 
     var body: some View {
         if player.hasMedia {
+            let _ = model.guideVersion
             let nn = player.channel.map { model.nowNext($0) }
             HStack(spacing: 12) {
                 LogoView(url: player.channel?.logo, size: 40, corner: 10, symbol: player.vod == nil ? "tv" : "film")
