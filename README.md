@@ -13,6 +13,10 @@ Lumina ships **no channels**; you add your own M3U / Xtream provider.
 | CarPlay scene | Compiles. **Not yet run**: needs the Simulator's CarPlay window (Xcode) or a car |
 | Real providers (Xtream/M3U), PiP, AirPlay, reminders | Not tested yet (no provider available in CI) |
 
+## Install on your iPhone for free
+No paid account needed: see [docs/SIDELOAD.md](docs/SIDELOAD.md) (free Apple ID + Sideloadly/AltStore; renew every 7 days; no CarPlay).
+With a paid account and TestFlight instead: [docs/TESTFLIGHT.md](docs/TESTFLIGHT.md).
+
 ## Setup (once)
 
 1. Install **Xcode 26+** from the App Store, open it once, accept the licence.
