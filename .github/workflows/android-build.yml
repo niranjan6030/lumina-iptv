@@ -21,7 +21,7 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Unit tests (core: parsers, guide, Xtream, search, failover helpers, HTTP)
+      - name: "Unit tests (parsers, guide, Xtream, search, failover helpers, HTTP)"
         run: ./gradlew :core:test --console=plain
 
       - name: Build debug APK
