@@ -83,5 +83,5 @@ capability shows as enabled; then run again.
 | `Invalid Provisioning Profile … CarPlay` | `CARPLAY_ENTITLEMENT=true` set before Apple approved it. Delete the variable. |
 
 ## Housekeeping
-* The repo is private and the key lives only in GitHub encrypted secrets. Delete the API key in App Store Connect when you're done.
+* The key lives only in GitHub's encrypted secrets (never in the code). Only people with write access to the repo can run the workflow. Delete the API key in App Store Connect when you're done.
 * macOS minutes in private repos are billed at 10× on GitHub's free tier (~200 real minutes/month), roughly 15–20 uploads per month.

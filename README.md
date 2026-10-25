@@ -1,7 +1,23 @@
-# Lumina — IPTV player for iPhone + CarPlay and Android + Android Auto
+# Lumina
 
-Native Swift / SwiftUI. Liquid Glass on iOS 26, graceful material fallback on iOS 17–25.
-Lumina ships **no channels**; you add your own M3U / Xtream provider.
+![Lumina on iPhone and Android](docs/screenshots/showcase.png)
+
+**An IPTV player for iPhone + CarPlay and Android + Android Auto.** Live TV with a TV guide, movies and series, one
+search box, automatic failover to backup streams, parental PIN, and a calm Liquid-Glass-style interface.
+Native Swift/SwiftUI on iOS, Kotlin/Jetpack Compose on Android, with the same logic written and tested in both.
+
+[![iOS build](https://github.com/niranjan6030/lumina-iptv/actions/workflows/ios-build.yml/badge.svg)](https://github.com/niranjan6030/lumina-iptv/actions/workflows/ios-build.yml)
+[![Android build](https://github.com/niranjan6030/lumina-iptv/actions/workflows/android-build.yml/badge.svg)](https://github.com/niranjan6030/lumina-iptv/actions/workflows/android-build.yml)
+
+| iPhone | | | Android | | |
+|---|---|---|---|---|---|
+| <img src="docs/screenshots/ios-live.png" width="150"> | <img src="docs/screenshots/ios-player.png" width="150"> | <img src="docs/screenshots/ios-library.png" width="150"> | <img src="docs/screenshots/android-live.png" width="150"> | <img src="docs/screenshots/android-player.png" width="150"> | <img src="docs/screenshots/android-library.png" width="150"> |
+
+> **Lumina is only a player.** It contains no channels, playlists or content. The demo source uses public Apple/Mux
+> test streams. Add playlists from a provider you have the right to use. Not affiliated with Apple, Google or any
+> IPTV service or app.
+
+Native Swift / SwiftUI on iPhone. Liquid Glass on iOS 26, graceful material fallback on iOS 17–25.
 
 ## Status — what has and hasn't been verified
 
@@ -98,3 +114,6 @@ App/UI/                SwiftUI screens
 App/CarPlay/           CarPlay scene + templates
 Config/Signing.xcconfig, project.yml (XcodeGen), scripts/
 ```
+
+## License
+MIT, see [LICENSE](LICENSE).
